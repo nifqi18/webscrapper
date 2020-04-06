@@ -1,15 +1,18 @@
 import React, { PropTypes } from 'react';
+import Preloader from '../../components/Preloader';
+
 export default class MarketScrape extends React.Component {
     static propTypes = {
         children: PropTypes.any,
         load: PropTypes.func,
+        status: PropTypes.string
 
     };
     constructor(props) {
         super(props);
     }
     render() {
-        const { children, load } = this.props
+        const { children, load, status } = this.props
         return (
             <div className="columns">
                 <div className="column is-3">
@@ -24,6 +27,13 @@ export default class MarketScrape extends React.Component {
                     </aside>
                 </div>
                 <div className="column is-9">
+                    {status === 'start' &&
+                        <center>
+                            <Preloader />
+                        </center>
+
+                    }
+
                     {children}
                 </div>
             </div>

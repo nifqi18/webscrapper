@@ -1,20 +1,20 @@
 const url = require('url');
 const puppeteer = require('puppeteer');
+// const http_file = 'https://cf.shopee.co.id/file/'
 
-
-const initialWidgets = [
-  { id: 1, color: 'Red', sprocketCount: 7, owner: 'John' },
-  { id: 2, color: 'Taupe', sprocketCount: 1, owner: 'George' },
-  { id: 3, color: 'Green', sprocketCount: 8, owner: 'Ringo' },
-  { id: 4, color: 'Blue', sprocketCount: 2, owner: 'Paul' }
-];
+// const initialWidgets = [
+//   { id: 1, color: 'Red', sprocketCount: 7, owner: 'John' },
+//   { id: 2, color: 'Taupe', sprocketCount: 1, owner: 'George' },
+//   { id: 3, color: 'Green', sprocketCount: 8, owner: 'Ringo' },
+//   { id: 4, color: 'Blue', sprocketCount: 2, owner: 'Paul' }
+// ];
 
 export function getWidgets(req, io) {
   const socket = io.sockets;
   let widgets = req.session.widgets;
   const abs = doscrape(socket)
   if (!widgets) {
-    widgets = initialWidgets;
+    widgets = [];
     req.session.widgets = widgets;
   }
   return widgets;
@@ -43,9 +43,24 @@ const doscrape = async (socket) => {
     const page = await browser.newPage();
     try {
       await page.setRequestInterception(true);
-      page.once('domcontentloaded', () => console.info('✅ DOM is ready'));
-      page.once('load', () => console.info('✅ Page is loaded'));
-      page.once('close', () => console.info('✅ Page is closed'));
+      page.once('domcontentloaded', () => {
+        socket.emit('shoope', {
+          status: 'ready',
+          message: 'Page is ready'
+        })
+      });
+      page.once('load', () => {
+        socket.emit('shoope', {
+          status: 'load',
+          message: 'Page is Load'
+        })
+      });
+      page.once('close', () => {
+        socket.emit('shoope', {
+          status: 'close',
+          message: 'Page is Close'
+        })
+      });
       page.on('request', interceptedRequest => {
         var urlc = interceptedRequest.url()
         var rectype = interceptedRequest.resourceType()
@@ -102,10 +117,6 @@ const doscrape = async (socket) => {
         const request = response.request();
         const urlreq = request.url();
         const urlparse = url.parse(urlreq)
-        var pathname = urlparse.pathname;
-        var categories = [];
-        // console.log(urlreq)
-
 
         if (urlreq.includes('api/v2/category_list/get')) {
           const _content = await response.text();

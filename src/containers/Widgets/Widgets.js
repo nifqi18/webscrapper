@@ -7,6 +7,7 @@ import { initializeWithKey } from 'redux-form';
 // import { WidgetForm } from 'components';
 import { asyncConnect } from 'redux-async-connect';
 import MarketScrape from './scrap';
+
 const http_file_shope = 'https://cf.shopee.co.id/file/'
 
 @asyncConnect([{
@@ -38,10 +39,15 @@ export default class Widgets extends Component {
 
   state = {
     message: '',
-    categorylist: []
+    categorylist: [],
+    status: 'idle'
   };
 
   componentDidMount() {
+    const { load } = this.props;
+    if (load) {
+      load()
+    }
     if (socket) {
       socket.on('shoope', this.onMessageReceived);
       setTimeout(() => {
@@ -57,6 +63,8 @@ export default class Widgets extends Component {
 
   onMessageReceived = ({ status, data, message }) => {
     // console.log(data)
+    this.setState({ status, message })
+    console.log(status)
 
     if (status === 'start') {
       this.setState({ categorylist: [] })
@@ -68,12 +76,12 @@ export default class Widgets extends Component {
       })
       console.log(data)
     }
-    this.setState({ message });
+    // this.setState({ message });
   }
 
   render() {
-    console.log(this.state);
-    const { categorylist, message } = this.state;
+    // console.log(this.state);
+    const { categorylist, message, status } = this.state;
     // const handleEdit = (widget) => {
     //   const { editStart } = this.props; // eslint-disable-line no-shadow
     //   return () => editStart(String(widget.id));
@@ -89,7 +97,8 @@ export default class Widgets extends Component {
     return (
       <div className={styles.widgets + ' container'}>
         <Helmet title="MarketPlace Online Scrapper" />
-        <MarketScrape load={load}>
+
+        <MarketScrape load={load} status={status}>
           {message &&
             <div className="alert alert-danger" role="alert">
               <span className="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>

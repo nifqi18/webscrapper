@@ -5,9 +5,9 @@ export default class Preloader extends React.Component {
     }
 
     render() {
-        const styles = require('./preloader.scss')
+        const styles = require('./Preloader.scss')
         return (
-            <div className="lds-ring"><div></div><div></div><div></div><div></div></div>
+            <div className={styles.ldsRing}><div></div><div></div><div></div><div></div></div>
         )
     }
 }
